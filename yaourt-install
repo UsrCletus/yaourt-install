@@ -105,7 +105,7 @@ function choose_dir {
 	echo
 	if [[ $REPLY == "" ]]
 	then
-		read -p "Are you ready to install?(y/n): "
+		read -p "Are you ready to install?(y/n): " -n 1 -r
 		if [[ $REPLY =~ ^[Yy]$ ]]
 		then
 			verify_choice
