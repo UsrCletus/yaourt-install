@@ -1,0 +1,194 @@
+#!/bin/bash
+#Simple script to install yaourt on arch written by Cletus
+
+installDir="/home/$(whoami)/builds/"
+
+function install {
+	cd $installDir
+	git clone https://aur.archlinux.org/package-query.git
+	cd package-query
+	makepkg -sri
+	cd $installDir
+	git clone https://aur.archlinux.org/yaourt.git
+	cd yaourt
+	makepkg -sri	
+}
+
+function checkDependencies {
+        pacDependencies="tar curl git yajl diffutils gettext sudo"
+        pacMissing=""
+	missingCount=0
+	echo "Checking dependencies..."
+	echo
+        for package in `echo $pacDependencies`
+        do
+                hasPackage=`pacman -Q $package 2>&1|grep "not found"|wc -l`
+                if [ $hasPackage -eq 0 ]
+                then
+                        echo "Found: $package"
+		else
+			pacMissing="$pacMissing $package"
+			missingCount=$(expr $missingCount + 1)
+                fi
+        done
+	base=$(pacman -Qs base-devel)
+        if [[ $base == "" ]]; then
+		pacMissing="$pacMissing $package"
+                missingCount=$(expr $missingCount + 1)
+	fi
+	if [ $missingCount -gt 0 ]
+	then
+		echo 
+		echo "----------------------------------------"
+		echo "You are missing the following packages: "
+        	echo "----------------------------------------"
+        	for missingPackage in $pacMissing
+        	do
+        		echo $missingPackage
+        	done
+		echo
+	        read -p "Would you like me to install them automagically?(y/n): " -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[Yy]$ ]]
+		then
+			sudo pacman -S $pacMissing
+		else
+			echo "Ok. To install them yourself do: "
+			echo "sudo pacman -S $pacMissing"
+			echo "Exiting.."
+			echo 
+			exit 1
+		fi
+	fi
+	choose_dir
+}
+
+function verify_choice {
+
+	wasVerified=0
+
+	if [ ! -d "$installDir" ]
+	then
+		echo "Install directory doesn't exist, attempting to create it..."
+		mkdir -p $installDir 2>/dev/null
+	else
+		echo "Install directory exists, checking permissions."
+	fi
+
+	if [ -d "$installDir" ]
+	then
+		badtouch="badtouch"
+		touchfile="$installDir$badtouch"
+        	touch $touchfile 2>/dev/null
+        	if [ -a "$touchfile" ]
+        	then    
+        		echo "OK"
+        		rm -fv $touchfile 2>/dev/null
+			wasVerified=$(expr $wasVerified + 1)
+		else
+			echo "Error attempting to create $installDir, please ensure you have write permissions before continuing."
+			exit 1
+        	fi
+	fi
+
+
+	if [ $wasVerified -gt 0 ]
+	then
+		install
+	fi
+
+}
+
+function choose_dir {
+
+	read -p "Install directory[$installDir]?:  " -r
+	echo
+	if [[ $REPLY == "" ]]
+	then
+		read -p "Are you ready to install?(y/n): "
+		if [[ $REPLY =~ ^[Yy]$ ]]
+		then
+			verify_choice
+		fi
+	else
+
+        	read -p "You chose $installDir, is this correct (y/n)?: " -n 1 -r
+        	echo
+        	if [[ $REPLY =~ ^[Yy]$ ]]
+        	then
+			verify_choice
+        	else
+        		exit 1
+        	fi
+	fi
+
+}
+
+function init {
+
+        echo
+        echo "==================================="
+        echo "==Yaourt Install Script by Cletus=="
+        echo "==================================="
+        echo
+
+	#Make sure user is NOT root
+	if [[ $EUID -eq 0 ]]; then
+	   echo "This script must NOT be run as root."
+	   echo "However, you must be in the sudoers file."
+	   exit 1
+	fi
+
+	#Check to make sure they have the 'wheel' group
+	hasWheel=$(grep $(whoami) /etc/group|grep wheel |wc -l)
+
+	if [ $hasWheel -lt 1 ]
+	then
+		echo "You do not appear to be part of the wheel group."
+		echo "To add yourself, escalate to root and run the following: "
+		echo "usermod -aG wheel $(whoami)"
+		echo "You may also need to give the wheel group sudo access by running the following: "
+		echo "visudo"
+		echo "This will open the /etc/sudoers file, which you will need to edit appropriately."
+		echo "For more information, go to: https://wiki.archlinux.org/index.php/Sudo"
+	fi
+
+	read -p "This script will attempt to install the yaourt package manually. Are you sure you wish to proceed(y/n)?:  " -n 1 -r
+	echo    
+	if [[ $REPLY =~ ^[Yy]$ ]]
+	then
+	    choose_dir
+	fi
+
+echo
+echo "Thanks for playing!"
+}
+
+function exit_funk {
+	echo
+        echo "Cleanup: "
+        read -p "Do you wish to remove the build directories(y/n)?: " -n 1 -r
+	echo
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+        	cleanup
+        fi
+
+	echo
+	echo "=================================================================================="
+	echo "====================Thanks for using my script!==================================="
+	echo "==You may use this script to upgrade by pointing it at an empty build directory.=="	
+	echo "=================================================================================="
+	echo
+}
+
+function cleanup {
+
+	yaourt="yaourt"
+	packageQuery="package-query"
+	rm -rfv $installDir$yaourt $installDir$packageQuery
+ 
+}
+
+init
+exit_funk
