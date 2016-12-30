@@ -4,7 +4,9 @@ User Friendly Script to install the yaourt tool. It uses the AUR git repos to ac
 To download and run this script issue the following commands: 
 
 $ git clone https://github.com/usrcletus/yaourt-install
+
 $ cd yaourt-install
+
 $ ./yaourt-install
 
 Advanced: 
