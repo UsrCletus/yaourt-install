@@ -1,8 +1,10 @@
 # yaourt-install
 User Friendly Script to install the yaourt tool. It uses the AUR git repos to accomodate the install, and takes care of dependencies.
 
-To use this script perform the following command: 
+To download and run this script issue the following commands: 
 
+$ git clone https://github.com/usrcletus/yaourt-install
+$ cd yaourt-install
 $ ./yaourt-install
 
 Advanced: 
