@@ -94,7 +94,7 @@ function verify_choice {
 
 	if [ $wasVerified -gt 0 ]
 	then
-		install
+		cd $installDir; sudo pacman -S --needed base-devel git && for package in package-query yaourt;do (git clone https://aur.archlinux.org/$package && cd $package && makepkg -sri); done
 	fi
 
 }
