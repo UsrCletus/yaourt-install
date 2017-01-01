@@ -192,8 +192,7 @@ function cleanup {
 
 function check_distro {
 
-	archcount=$(uname -a|grep ARCH|wc -l)
-	if [ $archcount -lt 1 ]
+	if [ ! -f "/etc/arch-release" ]
 	then
 		echo "You must be running an Arch Distribution to run this script!"
 		exit 0
