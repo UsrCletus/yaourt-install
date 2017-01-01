@@ -140,7 +140,7 @@ function init {
 	fi
 
 	#Check to make sure they have the 'wheel' group
-	hasWheel=$(grep $(whoami) /etc/group|grep wheel |wc -l)
+	hasWheel=$(groups $(whoami) |grep -c wheel)
 
 	if [ $hasWheel -lt 1 ]
 	then
