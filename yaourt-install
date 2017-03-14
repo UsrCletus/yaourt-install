@@ -64,7 +64,6 @@ function checkDependencies {
 }
 
 function verify_choice {
-
 	wasVerified=0
 
 	if [ ! -d "$installDir" ]
@@ -100,7 +99,6 @@ function verify_choice {
 }
 
 function choose_dir {
-
 	read -p "Install directory[$installDir]?:  " -r
 	echo
 	if [[ $REPLY == "" ]]
@@ -125,7 +123,6 @@ function choose_dir {
 }
 
 function init {
-
         echo
         echo "==================================="
         echo "==Yaourt Install Script by Cletus=="
@@ -183,7 +180,6 @@ function exit_funk {
 }
 
 function cleanup {
-
 	yaourt="yaourt"
 	packageQuery="package-query"
 	rm -rfv $installDir$yaourt $installDir$packageQuery
@@ -191,7 +187,6 @@ function cleanup {
 }
 
 function check_distro {
-
 	if [ ! -f "/etc/arch-release" ]
 	then
 		echo "You must be running an Arch Distribution to run this script!"
